@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Search{% endblock %}
+{% block content %}
+  <main class="main">
+    <section class="page-header">
+      <div class="container">
+        <h1>Search</h1>
+        <form class="search-form" action="{% url 'search' %}" method="get">
+          <input type="search" name="q" value="{{ query|default:'' }}" placeholder="Search research areas" aria-label="Search" />
+          <button type="submit">Search</button>
+        </form>
+      </div>
+    </section>
+    <section class="content-block">
+      <div class="container">
+        {% if query %}
+          <h2>Results for “{{ query }}”</h2>
+          <div class="area-grid">
+            {% for r in results %}
+              <a class="area-card" href="{% url 'research_detail' r.slug %}">
+                <h3>{{ r.title }}</h3>
+                <p>{{ r.summary }}</p>
+              </a>
+            {% empty %}
+              <p>No results found.</p>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p>Enter a query to search research areas.</p>
+        {% endif %}
+      </div>
+    </section>
+  </main>
+{% endblock %}

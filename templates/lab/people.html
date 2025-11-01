@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}People{% endblock %}
+{% block content %}
+  <main class="main people-page">
+    <section class="page-header">
+      <div class="container">
+        <h1>People</h1>
+        <p class="lead">Meet the team across all roles in the lab.</p>
+      </div>
+    </section>
+
+    <section class="content-block">
+      <div class="container">
+        <nav class="section-nav" aria-label="People sections">
+          {% for s in role_sections %}
+            <a class="chip" href="#{{ s.anchor_id }}">{{ s.label }}</a>
+          {% endfor %}
+        </nav>
+
+        {% for s in role_sections %}
+          <div id="{{ s.anchor_id }}" class="people-section">
+            <h2>{{ s.label }}</h2>
+            <div class="people-grid sortable" data-model="profile" data-group="{{ s.key }}">
+              {% for p in s.profiles %}
+                <article class="person-card sortable-item" {% if request.user.is_superuser %}draggable="true" data-id="{{ p.id }}"{% endif %}>
+                  <div class="person-photo">
+                    {% if p.profile_picture %}
+                      <img src="{{ p.profile_picture.url }}" alt="{{ p.user.get_full_name|default:p.user.username }} photo">
+                    {% else %}
+                      <div class="placeholder" aria-hidden="true">{{ p.user.get_full_name|default:p.user.username|slice:":1" }}</div>
+                    {% endif %}
+                  </div>
+                  <div class="person-body">
+                    {% if request.user.is_superuser %}<div class="drag-handle" title="Drag to reorder">↕</div>{% endif %}
+                    <h3 class="person-name">{{ p.user.get_full_name|default:p.user.username }}</h3>
+                    {% if p.affiliation %}<div class="person-affiliation">{{ p.affiliation }}</div>{% endif %}
+                    {% if p.professional_summary %}
+                      <div class="person-bio">{{ p.professional_summary|linebreaksbr }}</div>
+                    {% elif p.bibliography %}
+                      <div class="person-bio">{{ p.bibliography|linebreaksbr }}</div>
+                    {% endif %}
+
+                    <div class="contact-chips">
+                      {% if p.contact_email or p.user.email %}
+                        <a class="chip" href="mailto:{{ p.contact_email|default:p.user.email }}">Email</a>
+                      {% endif %}
+                      {% if p.google_scholar_url %}
+                        <a class="chip" href="{{ p.google_scholar_url }}" target="_blank" rel="noopener">Google Scholar</a>
+                      {% endif %}
+                      {% if p.research_gate_url %}
+                        <a class="chip" href="{{ p.research_gate_url }}" target="_blank" rel="noopener">Research Gate</a>
+                      {% endif %}
+                      {% if p.orcid_url %}
+                        <a class="chip" href="{{ p.orcid_url }}" target="_blank" rel="noopener">ORCID</a>
+                      {% endif %}
+                      <a class="chip" href="{% url 'profile_public' p.user.username %}">View Profile</a>
+                      {% if request.user.is_authenticated and request.user.id == p.user.id %}
+                        <a class="chip" href="{% url 'user_profile' %}">Profile</a>
+                      {% endif %}
+                    </div>
+
+                    <!-- profile bars removed per request -->
+                  </div>
+                </article>
+              {% empty %}
+                <p class="muted">No {{ s.label }} listed yet.</p>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+{% endblock %}

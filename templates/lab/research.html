@@ -1,0 +1,366 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load profile_links %}
+{% block title %}Research{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/pub_page.css' %}">{% endblock %}
+{% block content %}
+  <main class="main pub-page research-page">
+    <section class="page-header">
+      <div class="container">
+        <h1>Research</h1>
+        <nav class="segmented" id="research-tabs" aria-label="Research content tabs">
+          <a href="{% url 'research' %}?tab=publications" class="{% if selected_tab != 'projects' %}active{% endif %}" data-tab="publications" aria-controls="tab-publications" aria-selected="{% if selected_tab != 'projects' %}true{% else %}false{% endif %}">Publications</a>
+          <a href="{% url 'research' %}?tab=projects" class="{% if selected_tab == 'projects' %}active{% endif %}" data-tab="projects" aria-controls="tab-projects" aria-selected="{% if selected_tab == 'projects' %}true{% else %}false{% endif %}">Projects</a>
+        </nav>
+      </div>
+    </section>
+
+    <!-- Publications Tab -->
+    <section id="tab-publications" class="content-block {% if selected_tab == 'projects' %}hidden{% endif %}">
+      <div class="container">
+        <nav class="segmented" aria-label="Filter by role">
+          <a href="{% url 'research' %}?role=all" class="{% if role_selected == 'all' %}active{% endif %}">All</a>
+          {% for key,label in role_menu %}
+            <a href="{% url 'research' %}?role={{ key }}" class="{% if role_selected == key %}active{% endif %}">{{ label }}</a>
+          {% endfor %}
+        </nav>
+
+        {% if role_selected != 'all' %}
+          <div class="name-chips">
+            {% for section in pub_sections %}
+              {% if section.key == role_selected %}
+                <a class="chip {% if not user_selected_id %}active{% endif %}" href="{% url 'research' %}?role={{ role_selected }}">All in {{ section.label }}</a>
+                {% for p in section.profiles %}
+                  <a class="chip {% if user_selected_id == p.user.id %}active{% endif %}" href="{% url 'research' %}?role={{ role_selected }}&user_id={{ p.user.id }}">{{ p.user.get_full_name|default:p.user.username }}</a>
+                {% endfor %}
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <nav class="section-nav" aria-label="Filter by research area">
+          <div class="chip-bar pub-area-chips">
+            <a href="#" class="chip {% if area_selected == 'all' %}active{% endif %}" data-value="all">All areas</a>
+            {% for key,label in area_menu %}
+              <a href="#" class="chip {% if area_selected == key %}active{% endif %}" data-value="{{ key }}">{{ label }}</a>
+            {% endfor %}
+          </div>
+        </nav>
+        <div class="pub-filters" role="region" aria-label="Filter publications">
+          <div class="filter-item">
+            <label for="pub-search" class="sr-only">Search</label>
+            <input id="pub-search" class="control" type="text" placeholder="Search title or authors">
+          </div>
+          <div class="filter-item">
+            <label for="pub-type" class="sr-only">Type</label>
+            <select id="pub-type" class="control">
+              <option value="all">All types</option>
+              <option value="journal">Journal</option>
+              <option value="conference">Conference</option>
+              <option value="book">Book</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="filter-item">
+            <label for="pub-year" class="sr-only">Year</label>
+            <select id="pub-year" class="control">
+              <option value="all">All years</option>
+            </select>
+          </div>
+          <div class="filter-item">
+            <label for="pub-sort" class="sr-only">Sort</label>
+            <select id="pub-sort" class="control">
+              <option value="year_desc">Year: Newest first</option>
+              <option value="year_asc">Year: Oldest first</option>
+              <option value="title_az">Title: A → Z</option>
+            </select>
+          </div>
+        </div>
+
+        {% for section in pub_sections %}
+          <div class="user-section">
+            <h2 class="section-title">{{ section.label }}</h2>
+            <div class="profile-list sortable" data-model="profile" data-group="{{ section.key }}">
+              {% for p in section.profiles %}
+                <div id="profile-{{ p.id }}" class="profile-block sortable-item" {% if request.user.is_superuser %}draggable="true" data-id="{{ p.id }}"{% endif %}>
+                  <article class="user-intro">
+                    <div class="photo">
+                      {% if p.profile_picture %}
+                        <img src="{{ p.profile_picture.url }}" alt="{{ p.user.get_full_name|default:p.user.username }} photo">
+                      {% else %}
+                        <div class="placeholder" aria-hidden="true">{{ p.user.get_full_name|default:p.user.username|slice:":1" }}</div>
+                      {% endif %}
+                    </div>
+                    <div class="intro-text">
+                      {% if request.user.is_superuser %}<div class="drag-handle" title="Drag to reorder profile">↕</div>{% endif %}
+                      <h3 class="name">{{ p.user.get_full_name|default:p.user.username }}</h3>
+                      {% if p.affiliation %}<div class="affiliation">{{ p.affiliation }}</div>{% endif %}
+                    </div>
+                  </article>
+
+                  {% for pub in p.user.publications.all %}
+                    <article class="pub-card" data-year="{{ pub.publication_year }}" data-type="{% if pub.journal_title %}journal{% elif pub.conference_title %}conference{% elif pub.book_title %}book{% else %}other{% endif %}" data-title="{{ pub.title|lower }}" data-authors="{% for a in pub.authors.all %}{{ a.name|lower }}{% if not forloop.last %}, {% endif %}{% endfor %}" data-areas="{% for ra in pub.research_areas.all %}{{ ra.key }},{% endfor %}{% if pub.research_area %}{{ pub.research_area }}{% endif %}">
+                      <div class="pub-media">
+                        <div class="pub-slideshow" data-interval="3000" id="slideshow-{{ pub.id }}">
+                          {% for img in pub.images.all %}
+                            <div class="slide"><img src="{{ img.image.url }}" alt="Publication image"></div>
+                          {% empty %}
+                            <div class="slide active"><div class="no-image">No images</div></div>
+                          {% endfor %}
+                        </div>
+                      </div>
+                      <div class="pub-info">
+                        {% if request.user.is_superuser %}<div class="drag-handle" title="Drag to reorder">↕</div>{% endif %}
+                        <div class="pub-head">
+                          <strong class="pub-title">{{ pub.title }}</strong>
+                          <span class="pub-year">{{ pub.publication_year }}</span>
+                        </div>
+                        <div class="authors">
+                          {% for a in pub.authors.all %}
+                            {% author_link a.name a.mail %}{% if not forloop.last %}, {% endif %}
+                          {% empty %}
+                            <span class="muted">No authors listed</span>
+                          {% endfor %}
+                        </div>
+                        <div class="venue">
+                          {% if pub.journal_title %}{{ pub.journal_title }}{% elif pub.conference_title %}{{ pub.conference_title }}{% elif pub.book_title %}{{ pub.book_title }}{% endif %}
+                        </div>
+                        <div class="action-row">
+                          <button class="btn ghost btn-abs" data-toggle="collapse" data-target="abs-{{ pub.id }}">Abstract</button>
+                          <button class="btn ghost btn-bib" data-toggle="collapse" data-target="bib-{{ pub.id }}">BibTeX</button>
+                          {% if pub.link_paper %}
+                            <a class="btn ghost" href="{{ pub.link_paper }}" target="_blank" rel="noopener">Paper link</a>
+                          {% else %}
+                            <button class="btn ghost disabled" disabled>Paper link</button>
+                          {% endif %}
+                          {% if pub.github_link %}
+                            <a class="btn ghost" href="{{ pub.github_link }}" target="_blank" rel="noopener">GitHub</a>
+                          {% else %}
+                            <button class="btn ghost disabled" disabled>GitHub</button>
+                          {% endif %}
+                          <div id="abs-{{ pub.id }}" class="collapsible hidden">
+                            <h4>Abstract</h4>
+                            {% if pub.abstract %}
+                              <p>{{ pub.abstract }}</p>
+                            {% else %}
+                              <p class="muted">No abstract provided.</p>
+                            {% endif %}
+                          </div>
+                          <div id="bib-{{ pub.id }}" class="collapsible hidden">
+                            <h4>BibTeX</h4>
+                            <span class="copy-hint">Click to copy</span>
+                            {% if pub.bibtex %}
+                              <pre>{{ pub.bibtex }}</pre>
+                            {% else %}
+                              <p class="muted">No BibTeX provided.</p>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  {% empty %}
+                    <p class="muted">No publications added yet.</p>
+                  {% endfor %}
+                </div>
+              {% empty %}
+                <p class="muted">No users in this role yet.</p>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Projects Tab -->
+    <section id="tab-projects" class="content-block {% if selected_tab != 'projects' %}hidden{% endif %}">
+      <div class="container">
+        <nav class="section-nav" aria-label="Research areas">
+          <div class="chip-bar">
+            {% for s in area_sections %}
+              <a class="chip" href="#area-{{ s.key }}">{{ s.label }}</a>
+            {% endfor %}
+          </div>
+        </nav>
+
+        <!-- Projects Filters -->
+        <div class="pub-filters" role="region" aria-label="Filter projects">
+          <div class="filter-item">
+            <label for="research-search" class="sr-only">Search</label>
+            <input id="research-search" class="control" type="text" placeholder="Search title or authors">
+          </div>
+          <div class="filter-item">
+            <label for="research-type" class="sr-only">Type</label>
+            <select id="research-type" class="control">
+              <option value="all">All types</option>
+              <!-- project types appended dynamically -->
+            </select>
+          </div>
+          <div class="filter-item">
+            <label for="research-year" class="sr-only">Year</label>
+            <select id="research-year" class="control">
+              <option value="all">All years</option>
+              <!-- years appended dynamically -->
+            </select>
+          </div>
+          <div class="filter-item">
+            <label for="research-sort" class="sr-only">Sort</label>
+            <select id="research-sort" class="control">
+              <option value="year_desc">Year: Newest first</option>
+              <option value="year_asc">Year: Oldest first</option>
+              <option value="title_az">Title: A → Z</option>
+            </select>
+          </div>
+        </div>
+
+        {% for section in area_sections %}
+          <div class="user-section" id="area-{{ section.key }}">
+            <div class="area-header">
+              <div class="area-image">
+                {% if section.image %}
+                  <img src="{{ section.image.url }}" alt="{{ section.label }} cover">
+                {% else %}
+                  <div class="placeholder" aria-hidden="true">{{ section.label|slice:":1" }}</div>
+                {% endif %}
+              </div>
+              <div class="area-text">
+                <h2 class="section-title">{{ section.label }}</h2>
+                {% if section.summary %}<p class="lead">{{ section.summary }}</p>{% endif %}
+                {% if section.details %}<p class="area-details">{{ section.details }}</p>{% endif %}
+              </div>
+            </div>
+
+            <div class="ongoing-projects" aria-labelledby="selected-projects-{{ section.key }}">
+              <h3 id="selected-projects-{{ section.key }}">Selected Research Projects</h3>
+              {% for sp in section.selected_projects %}
+                <article class="pub-card no-media" data-title="{{ sp.title }}" data-authors="{% for a in sp.authors.all %}{{ a.name }}{% if not forloop.last %}, {% endif %}{% endfor %}" data-year="{{ sp.publication_year }}" data-work-type="{{ sp.work_type }}" data-work-type-label="{{ sp.get_work_type_display }}" data-area="{{ section.key }}">
+                  <div class="pub-info">
+                    <div class="ref-line" aria-label="Citation style heading">
+                      <strong class="ref-title">{{ sp.title }}</strong>
+                      <span class="ref-meta">
+                        {% if sp.conference_title %}  {{ sp.conference_title }}  {% elif sp.journal_title %}  {{ sp.journal_title }}  {% elif sp.book_title %}  {{ sp.book_title }}  {% endif %}
+                        , {{ sp.publication_year }}
+                      </span>
+                    </div>
+
+                    <div class="action-row">
+                      <button class="btn ghost view-details" data-toggle="collapse" data-target="selected-details-{{ section.key }}-{{ sp.id }}">View Details</button>
+                      {% if sp.github_link %}
+                        <a class="btn ghost" href="{{ sp.github_link }}" target="_blank" rel="noopener">GitHub</a>
+                      {% endif %}
+                    </div>
+
+                    <div id="selected-details-{{ section.key }}-{{ sp.id }}" class="collapsible hidden">
+                      <div class="details-grid">
+                        <div class="detail-block">
+                          <h4>Objective</h4>
+                          {% if sp.objective %}
+                            <p>{{ sp.objective }}</p>
+                          {% else %}
+                            <p class="muted">No objective provided.</p>
+                          {% endif %}
+                        </div>
+                        <div class="detail-block">
+                          <h4>Key Findings</h4>
+                          {% if sp.contributions.all %}
+                            <ul class="bullet-list">
+                              {% for c in sp.contributions.all %}
+                                <li>{{ c.text }}</li>
+                              {% empty %}
+                                <li class="muted">No findings listed yet.</li>
+                              {% endfor %}
+                            </ul>
+                          {% else %}
+                            <p class="muted">No findings listed yet.</p>
+                          {% endif %}
+                        </div>
+                        <div class="detail-block">
+                          <h4>Photos</h4>
+                          {% if sp.images.all %}
+                            <div class="image-row large">
+                              {% for img in sp.images.all %}
+                                <img src="{{ img.image.url }}" alt="Project image" class="thumb">
+                              {% endfor %}
+                            </div>
+                          {% else %}
+                            <p class="muted">No photos added.</p>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              {% empty %}
+                <p class="muted">No selected projects in this area.</p>
+              {% endfor %}
+            </div>
+
+            <div class="ongoing-projects" aria-labelledby="ongoing-projects-{{ section.key }}">
+              <h3 id="ongoing-projects-{{ section.key }}">Ongoing Research Projects</h3>
+              {% for op in section.ongoing_projects %}
+                <article class="pub-card no-media" data-title="{{ op.title }}" data-authors="{% for a in op.authors.all %}{{ a.name }}{% if not forloop.last %}, {% endif %}{% endfor %}" data-year="{{ op.publication_year }}" data-work-type="{{ op.work_type }}" data-work-type-label="{{ op.get_work_type_display }}" data-area="{{ section.key }}">
+                  <div class="pub-info">
+                    <div class="ref-line" aria-label="Citation style heading">
+                      <strong class="ref-title">{{ op.title }}</strong>
+                      <span class="ref-meta">
+                        {% if op.conference_title %}  {{ op.conference_title }}  {% elif op.journal_title %}  {{ op.journal_title }}  {% elif op.book_title %}  {{ op.book_title }}  {% endif %}
+                        , {{ op.publication_year }}
+                      </span>
+                    </div>
+
+                    <div class="action-row">
+                      <button class="btn ghost view-details" data-toggle="collapse" data-target="ongoing-details-{{ section.key }}-{{ op.id }}">View Details</button>
+                      {% if op.github_link %}
+                        <a class="btn ghost" href="{{ op.github_link }}" target="_blank" rel="noopener">GitHub</a>
+                      {% endif %}
+                    </div>
+
+                    <div id="ongoing-details-{{ section.key }}-{{ op.id }}" class="collapsible hidden">
+                      <div class="details-grid">
+                        <div class="detail-block">
+                          <h4>Objective</h4>
+                          {% if op.objective %}
+                            <p>{{ op.objective }}</p>
+                          {% else %}
+                            <p class="muted">No objective provided.</p>
+                          {% endif %}
+                        </div>
+                        <div class="detail-block">
+                          <h4>Key Findings</h4>
+                          {% if op.contributions.all %}
+                            <ul class="bullet-list">
+                              {% for c in op.contributions.all %}
+                                <li>{{ c.text }}</li>
+                              {% empty %}
+                                <li class="muted">No findings listed yet.</li>
+                              {% endfor %}
+                            </ul>
+                          {% else %}
+                            <p class="muted">No findings listed yet.</p>
+                          {% endif %}
+                        </div>
+                        <div class="detail-block">
+                          <h4>Photos</h4>
+                          {% if op.images.all %}
+                            <div class="image-row large">
+                              {% for img in op.images.all %}
+                                <img src="{{ img.image.url }}" alt="Project image" class="thumb">
+                              {% endfor %}
+                            </div>
+                          {% else %}
+                            <p class="muted">No photos added.</p>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              {% empty %}
+                <p class="muted">No ongoing projects in this area.</p>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+{% endblock %}

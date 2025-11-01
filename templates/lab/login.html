@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}User Login{% endblock %}
+{% block content %}
+  <main class="main" data-show-signup="{% if show_signup %}true{% else %}false{% endif %}">
+    <section class="page-header">
+      <div class="container">
+        <h1>User Login</h1>
+        <p class="lead">Sign in with your email and password. Not registered? Use the sign-up form below.</p>
+      </div>
+    </section>
+
+    <section class="content-block">
+      <div class="container">
+        {% if messages %}
+          <ul class="messages">
+            {% for message in messages %}
+              <li class="message {{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+        <div id="login-panel" class="form-card {% if show_signup %}hidden{% endif %}">
+          <h2>Login</h2>
+          <form action="{% url 'login' %}" method="post" class="form-grid" novalidate>
+            {% csrf_token %}
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <div class="checkbox-line">
+              <input type="checkbox" id="show-login-password" data-toggle-password="#password">
+              <label for="show-login-password">Show password</label>
+            </div>
+
+            <label for="captcha">Captcha: <span class="captcha-question">{{ captcha_question }}</span></label>
+            <input type="text" id="captcha" name="captcha" placeholder="Answer the question above" required>
+
+            <div class="form-actions">
+              <button type="submit" class="btn primary">Login</button>
+              <span class="form-help">Forgot password? <a href="{% url 'forgot_password' %}">Reset it</a></span>
+              <span class="form-help">Not registered? <a href="#signup" data-toggle-signup>Sign Up</a></span>
+            </div>
+          </form>
+        </div>
+
+        <div id="signup-panel" class="form-card {% if not show_signup %}hidden{% endif %}">
+          <h2>Sign Up</h2>
+          <form action="{% url 'signup' %}" method="post" class="form-grid" novalidate>
+            {% csrf_token %}
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" placeholder="Your full name" required>
+
+            <label for="signup-email">Email</label>
+            <input type="email" id="signup-email" name="email" placeholder="you@example.com" required>
+
+            <label for="signup-password">Password</label>
+            <input type="password" id="signup-password" name="password" placeholder="Create a password" required>
+            <div class="checkbox-line">
+              <input type="checkbox" id="show-signup-password" data-toggle-password="#signup-password">
+              <label for="show-signup-password">Show password</label>
+            </div>
+
+            <label for="confirm-password">Confirm Password</label>
+            <input type="password" id="confirm-password" name="confirm_password" placeholder="Re-enter your password" required>
+            <div class="checkbox-line">
+              <input type="checkbox" id="show-signup-confirm" data-toggle-password="#confirm-password">
+              <label for="show-signup-confirm">Show password</label>
+            </div>
+
+            <label for="organization">Organization</label>
+            <input type="text" id="organization" name="organization" placeholder="Your organization" required>
+
+            <label for="department">Department</label>
+            <input type="text" id="department" name="department" placeholder="Your department" required>
+
+            <label for="role">Role</label>
+            <select id="role" name="role" required>
+              {% for key,label in role_choices.items %}
+                <option value="{{ key }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+
+            <!-- Honeypot field (hidden) -->
+            <label for="contact_phone" class="hp-field">Contact Phone</label>
+            <input type="text" id="contact_phone" name="contact_phone" class="hp-field" autocomplete="off" tabindex="-1">
+
+            <!-- Simple checkbox captcha -->
+            <div class="checkbox-line">
+              <input type="checkbox" id="i_am_not_robot" name="i_am_not_robot" required>
+              <label for="i_am_not_robot">I am not a robot</label>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn primary">Register</button>
+              <span class="form-help">Already registered? <a href="#" data-toggle-login>Back to Login</a></span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+{% endblock %}

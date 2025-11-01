@@ -1,0 +1,81 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}VIP Research Lab{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <header class="site-header" role="banner">
+    <div class="container header-inner">
+      <a href="{% url 'home' %}" class="brand">
+        <img class="brand-logo" src="{% static 'image/MIST Logo_0.png' %}" alt="MIST logo">
+        <span class="brand-text-wrap">
+          <span class="brand-text">VIP Lab</span>
+          <span class="brand-subtext">Department of Electrical, Electronic and Communication Engineering, MIST</span>
+        </span>
+      </a>
+      <nav aria-label="Primary" role="navigation">
+        <ul class="nav-list">
+          <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a></li>
+          <li><a href="{% url 'research' %}" class="{% if request.resolver_match.url_name == 'research' %}active{% endif %}">Research</a></li>
+          <li><a href="{% url 'people' %}" class="{% if request.resolver_match.url_name == 'people' %}active{% endif %}">People</a></li>
+          {% if request.user.is_authenticated %}
+            {% if not request.user.is_superuser %}
+              <li>
+                <span class="user-chip" title="Signed in">
+                  <span class="status-dot" aria-hidden="true"></span>
+                  {{ request.user.get_full_name|default:request.user.username }}
+                </span>
+              </li>
+              <li><a href="{% url 'user_profile' %}" class="{% if request.resolver_match.url_name == 'user_profile' %}active{% endif %}">Profile</a></li>
+              <li><a class="logout" href="{% url 'logout' %}">Logout</a></li>
+            {% else %}
+              <li><a href="{% url 'admin_users' %}" class="{% if request.resolver_match.url_name == 'admin_users' %}active{% endif %}">Admin Panel</a></li>
+              <li><a class="logout" href="{% url 'logout' %}">Logout</a></li>
+            {% endif %}
+          {% else %}
+            <li><a class="login" href="{% url 'login' %}">Login</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="content" role="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="container footer-inner">
+      <div class="footer-left">
+        <div class="footer-brand">VIP Research Lab</div>
+        <div class="footer-address">
+          <div>Address:</div>
+          <div>Floor-02, Tower-3,</div>
+          <div>Military Institute of Science and Technology,</div>
+          <div>Dhaka-1216, Bangladesh</div>
+        </div>
+      </div>
+      <div class="footer-center">
+        <nav class="footer-nav" aria-label="Footer">
+          <ul>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'people' %}">People</a></li>
+            <li><a href="{% url 'research' %}">Research</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="footer-right">
+        <img class="footer-logo" src="{% static 'image/MIST Logo_0.png' %}" alt="MIST logo" style="height:64px;width:auto;">
+      </div>
+    </div>
+    <div class="container footer-meta">&copy; {% now "Y" %} VIP Research Lab</div>
+  </footer>
+
+  <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>

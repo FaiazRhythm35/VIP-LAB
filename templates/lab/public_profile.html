@@ -1,0 +1,343 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load textformat %}
+{% load profile_links %}
+{% block title %}{{ view_user.get_full_name|default:view_user.username }} — Profile{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/public_profile.css' %}">{% endblock %}
+{% block content %}
+<main class="main profile-page" aria-labelledby="public-profile-title">
+  <section class="page-header">
+    <div class="container">
+      <h1 id="public-profile-title">Profile</h1>
+      <p class="lead">Public profile for {{ view_user.get_full_name|default:view_user.username }}.</p>
+    </div>
+  </section>
+
+  <section class="content-block">
+    <div class="container profile-layout">
+      <aside class="profile-sidebar" aria-label="Profile sections">
+        <ul>
+          <li><a href="#" data-section="profile" class="active">Profile</a></li>
+          <li><a href="#" data-section="achievements">Achievements</a></li>
+          <li><a href="#" data-section="experiences">Experiences</a></li>
+          <li><a href="#" data-section="projects">Projects</a></li>
+          <li><a href="#" data-section="cv">CV</a></li>
+        </ul>
+      </aside>
+
+      <div class="profile-content">
+        <!-- Profile Tab -->
+        <div class="section-panel" id="section-profile">
+          <div class="public-profile-header">
+            <div class="header-text">
+              <h2 class="profile-title">{{ view_user.get_full_name|default:view_user.username }}</h2>
+              {% if profile and profile.affiliation %}
+                <div class="profile-subtitle">{{ profile.affiliation }}</div>
+              {% endif %}
+              {% if profile %}
+                <div class="profile-links contact-chips" aria-label="External profiles">
+                  {% if profile.contact_email %}<a class="chip" href="mailto:{{ profile.contact_email }}">Email</a>{% endif %}
+                  {% if profile.google_scholar_url %}<a class="chip" href="{{ profile.google_scholar_url }}" target="_blank" rel="noopener">Google Scholar</a>{% endif %}
+                  {% if profile.research_gate_url %}<a class="chip" href="{{ profile.research_gate_url }}" target="_blank" rel="noopener">ResearchGate</a>{% endif %}
+                  {% if profile.orcid_url %}<a class="chip" href="{{ profile.orcid_url }}" target="_blank" rel="noopener">ORCID</a>{% endif %}
+                  {% if profile.github_url %}<a class="chip" href="{{ profile.github_url }}" target="_blank" rel="noopener">GitHub</a>{% endif %}
+                </div>
+              {% endif %}
+            </div>
+            <div class="header-photo">
+              {% if profile and profile.profile_picture %}
+                <img src="{{ profile.profile_picture.url }}" alt="{{ view_user.get_full_name|default:view_user.username }} photo">
+              {% else %}
+                <div class="placeholder" aria-hidden="true">{{ view_user.get_full_name|default:view_user.username|slice:":1" }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if profile and profile.bibliography %}
+            <div class="bio-block">
+              {{ profile.bibliography|linebreaksbr }}
+            </div>
+          {% endif %}
+
+          <div class="two-col">
+            <div>
+              <h3>Interests</h3>
+              <ul class="bullet-list">
+                {% for interest in interests %}
+                  <li>{{ interest.name }}</li>
+                {% empty %}
+                  <li class="muted">No interests added yet.</li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div>
+              <h3>Education</h3>
+              <ul class="bullet-list">
+                {% for edu in education_entries %}
+                  <li>
+                    <strong>{{ edu.name }}</strong>
+                    {% if edu.institute %} — {{ edu.institute }}{% endif %}
+                    {% if edu.years %} <span class="muted">({{ edu.years }})</span>{% endif %}
+                  </li>
+                {% empty %}
+                  <li class="muted">No education entries yet.</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+
+          <div class="selected-publications">
+            <h3>Selected Publications</h3>
+            {% for pub in publications %}
+              <article class="pub-card">
+                <div class="pub-media">
+                  <div class="pub-slideshow" data-interval="3000" id="slideshow-{{ pub.id }}">
+                    {% for img in pub.images.all %}
+                      <div class="slide"><img src="{{ img.image.url }}" alt="Publication image"></div>
+                    {% empty %}
+                      <div class="slide active"><div class="no-image">No images</div></div>
+                    {% endfor %}
+                  </div>
+                </div>
+                <div class="pub-info">
+                  <div class="pub-head">
+                    <strong class="pub-title">{{ pub.title }}</strong>
+                    <span class="pub-year">{{ pub.publication_year }}</span>
+                  </div>
+                  <div class="authors">
+                    {% for a in pub.authors.all %}
+                      {% author_link a.name a.mail %}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                      <span class="muted">No authors listed</span>
+                    {% endfor %}
+                  </div>
+                  <div class="venue">
+                    {% if pub.journal_title %}{{ pub.journal_title }}{% elif pub.conference_title %}{{ pub.conference_title }}{% elif pub.book_title %}{{ pub.book_title }}{% endif %}
+                  </div>
+                  <div class="action-row">
+                    <button class="btn ghost btn-abs" data-toggle="collapse" data-target="abs-{{ pub.id }}">Abstract</button>
+                    <button class="btn ghost btn-bib" data-toggle="collapse" data-target="bib-{{ pub.id }}">BibTeX</button>
+                    {% if pub.link_paper %}
+                      <a class="btn ghost" href="{{ pub.link_paper }}" target="_blank" rel="noopener">Paper link</a>
+                    {% else %}
+                      <button class="btn ghost disabled" disabled>Paper link</button>
+                    {% endif %}
+                    {% if pub.github_link %}
+                      <a class="btn ghost" href="{{ pub.github_link }}" target="_blank" rel="noopener">Github</a>
+                    {% else %}
+                      <button class="btn ghost disabled" disabled>Github</button>
+                    {% endif %}
+                  </div>
+                  <div id="abs-{{ pub.id }}" class="collapsible hidden">
+                    <h4>Abstract</h4>
+                    {% if pub.abstract %}
+                      <p>{{ pub.abstract }}</p>
+                    {% else %}
+                      <p class="muted">No abstract provided.</p>
+                    {% endif %}
+                  </div>
+                  <div id="bib-{{ pub.id }}" class="collapsible hidden">
+                    <h4>BibTeX</h4>
+                    <span class="copy-hint">Click to copy</span>
+                    {% if pub.bibtex %}
+                      <pre>{{ pub.bibtex }}</pre>
+                    {% else %}
+                      <p class="muted">No BibTeX provided.</p>
+                    {% endif %}
+                  </div>
+                </div>
+              </article>
+            {% empty %}
+              <p class="muted">No publications listed.</p>
+            {% endfor %}
+          </div>
+
+          <!-- Ongoing Research Projects -->
+          <div class="ongoing-projects" aria-labelledby="ongoing-projects-title">
+            <h3 id="ongoing-projects-title">🧪 Ongoing Research Projects</h3>
+            {% for op in ongoing_projects %}
+              <article class="pub-card no-media" data-title="{{ op.title }}" data-authors="{% for a in op.authors.all %}{{ a.name }}{% if not forloop.last %}, {% endif %}{% endfor %}" data-year="{{ op.publication_year }}">
+                <div class="pub-info">
+                  <!-- Reference-style heading -->
+                  <div class="ref-line" aria-label="Citation style heading">
+                    <strong class="ref-title">{{ op.title }}</strong>
+                    <span class="ref-meta">
+                      {% if op.conference_title %}  {{ op.conference_title }}  {% elif op.journal_title %}  {{ op.journal_title }}  {% elif op.book_title %}  {{ op.book_title }}  {% endif %}
+                      , {{ op.publication_year }}
+                    </span>
+                  </div>
+
+                  <div class="action-row">
+                    <button class="btn ghost view-details" data-toggle="collapse" data-target="ongoing-details-{{ op.id }}">View Details</button>
+                    {% if op.github_link %}
+                      <a class="btn ghost" href="{{ op.github_link }}" target="_blank" rel="noopener">GitHub</a>
+                    {% endif %}
+                  </div>
+
+                  <div id="ongoing-details-{{ op.id }}" class="collapsible hidden">
+                    <div class="details-grid">
+                      <div class="detail-block">
+                        <h4>Objective</h4>
+                        {% if op.objective %}
+                          <p>{{ op.objective }}</p>
+                        {% else %}
+                          <p class="muted">No objective provided.</p>
+                        {% endif %}
+                      </div>
+                      <div class="detail-block">
+                        <h4>Key Findings</h4>
+                        {% if op.contributions.all %}
+                          <ul class="bullet-list">
+                            {% for c in op.contributions.all %}
+                              <li>{{ c.text }}</li>
+                            {% empty %}
+                              <li class="muted">No findings listed yet.</li>
+                            {% endfor %}
+                          </ul>
+                        {% else %}
+                          <p class="muted">No findings listed yet.</p>
+                        {% endif %}
+                      </div>
+                      <div class="detail-block">
+                        <h4>Photos</h4>
+                        {% if op.images.all %}
+                          <div class="image-row large">
+                            {% for img in op.images.all %}
+                              <img src="{{ img.image.url }}" alt="Project image" class="thumb">
+                            {% endfor %}
+                          </div>
+                        {% else %}
+                          <p class="muted">No photos added.</p>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            {% empty %}
+              <p class="muted">No ongoing research projects listed.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Achievements Tab -->
+        <div class="section-panel hidden" id="section-achievements">
+          <h2>Achievements</h2>
+          <ul class="ach-list">
+            {% for ach in achievements %}
+              <li>
+                <div class="ach-year">{{ ach.year }}</div>
+                <div class="ach-desc">{{ ach.description|format_ach|safe }}</div>
+              </li>
+            {% empty %}
+              <li class="muted">No achievements added yet.</li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <!-- Experiences Tab -->
+        <div class="section-panel hidden" id="section-experiences">
+          <h2>Experiences</h2>
+
+          <h3>Work Experiences</h3>
+          <div class="exp-list">
+            {% for exp in work_experiences %}
+              <article class="exp-item">
+                <div class="exp-head">
+                  <span class="year-tag">{{ exp.years }}</span>
+                  <strong class="exp-title">{{ exp.title }}</strong>
+                  {% if exp.institute %}<span class="inst-line">🏛 {{ exp.institute }}</span>{% endif %}
+                </div>
+                {% if exp.subtitle %}<div class="exp-subtitle">{{ exp.subtitle }}</div>{% endif %}
+                {% if exp.link %}
+                  <div class="link-row contact-chips"><a class="chip" href="{{ exp.link }}" target="_blank" rel="noopener">Link</a></div>
+                {% endif %}
+                {% if exp.points.all %}
+                  <ul class="bullet-list">
+                    {% for pt in exp.points.all %}
+                      <li>{{ pt.text }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </article>
+            {% empty %}
+              <p class="muted">No work experiences yet.</p>
+            {% endfor %}
+          </div>
+
+          <h3>Professional Affiliation</h3>
+          <div class="exp-list">
+            {% for exp in affiliation_experiences %}
+              <article class="exp-item">
+                <div class="exp-head">
+                  <span class="year-tag">{{ exp.years }}</span>
+                  <strong class="exp-title">{{ exp.title }}</strong>
+                  {% if exp.institute %}<span class="inst-line">🏛 {{ exp.institute }}</span>{% endif %}
+                </div>
+                {% if exp.subtitle %}<div class="exp-subtitle">{{ exp.subtitle }}</div>{% endif %}
+                {% if exp.link %}
+                  <div class="link-row contact-chips"><a class="chip" href="{{ exp.link }}" target="_blank" rel="noopener">Link</a></div>
+                {% endif %}
+                {% if exp.points.all %}
+                  <ul class="bullet-list">
+                    {% for pt in exp.points.all %}
+                      <li>{{ pt.text }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </article>
+            {% empty %}
+              <p class="muted">No professional affiliations yet.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Projects Tab -->
+        <div class="section-panel hidden" id="section-projects">
+          <h2>Projects</h2>
+          <div class="proj-list">
+            {% for proj in projects %}
+              <article class="proj-item">
+                <div class="proj-head">
+                  <span class="year-tag">{{ proj.year }}</span>
+                  <strong class="proj-title">{{ proj.title }}</strong>
+                  {% if proj.institute %}<span class="inst-line">🏛 {{ proj.institute }}</span>{% endif %}
+                </div>
+                {% if proj.subtitle %}<div class="proj-subtitle">{{ proj.subtitle }}</div>{% endif %}
+                {% if proj.github_link %}
+                  <div class="link-row contact-chips"><a class="chip" href="{{ proj.github_link }}" target="_blank" rel="noopener">GitHub</a></div>
+                {% endif %}
+                {% if proj.points.all %}
+                  <ul class="bullet-list">
+                    {% for pt in proj.points.all %}
+                      <li>{{ pt.text }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </article>
+            {% empty %}
+              <p class="muted">No projects added yet.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- CV Tab -->
+        <div class="section-panel hidden" id="section-cv">
+          <h2>CV</h2>
+          {% if profile and profile.cv_pdf %}
+            <div class="cv-viewer" aria-label="CV preview">
+              <iframe src="{% url 'cv_pdf' view_user.username %}#zoom=page-width" title="CV PDF viewer"></iframe>
+            </div>
+            <div class="cv-actions">
+              <a class="btn" href="{% url 'cv_pdf' view_user.username %}" target="_blank" rel="noopener">Open CV in new tab</a>
+              <a class="btn primary" href="{{ profile.cv_pdf.url }}" download>Download CV (PDF)</a>
+            </div>
+          {% else %}
+            <p class="muted">No CV uploaded.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}

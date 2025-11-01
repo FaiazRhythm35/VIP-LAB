@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load textformat %}
+{% load profile_links %}
+{% block title %}VIP Research Lab — Home{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/home.css' %}">{% endblock %}
+{% block content %}
+  <main class="main" id="home">
+    <!-- Hero -->
+    <section class="hero" aria-label="Virtual Image Processing Research Lab">
+      <div class="hero-overlay">
+        <div class="hero-panel">
+          <h1>Visual Image Processing Research Lab</h1>
+          <p class="subtitle">Advancing computer vision, medical imaging, remote sensing, and bioinformatics.</p>
+          <div class="hero-cta">
+            <a class="btn primary" href="#research-areas">Explore Research</a>
+            <a class="btn ghost" href="{% url 'about' %}">Learn More</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- About + News two-column -->
+    <section id="about" class="about" aria-labelledby="about-title">
+      <div class="container">
+        <h2 id="about-title" class="section-title">About</h2>
+        <div class="about-news-grid">
+          <div class="about-block">
+            <p>{{ about_summary }}</p>
+            <div class="hero-cta" style="margin-top: 12px;">
+              <a class="btn ghost" href="{% url 'about' %}">Learn More</a>
+            </div>
+          </div>
+          <div class="news-block">
+            <h3 class="sub-title">News</h3>
+            <ul class="news-list">
+              {% for n in home_news %}
+                <li class="news-item">{{ n.text|format_ach }}</li>
+              {% empty %}
+                <li class="muted">No news yet.</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Awards & Achievements -->
+    <section id="awards" class="awards" aria-labelledby="awards-title">
+      <div class="container">
+        <h2 id="awards-title" class="section-title">Awards & Achievements</h2>
+        <ul class="awards-grid">
+          {% for a in home_awards %}
+            <li class="award-card">
+              <div class="award-media">
+                {% if a.image %}
+                  <img src="{{ a.image.url }}" alt="Award: {{ a.text|striptags }}" title="{{ a.text|striptags }}" />
+                {% else %}
+                  <div class="no-image" aria-label="No image">🏅</div>
+                {% endif %}
+              </div>
+              <div class="award-caption">{{ a.text|format_ach }}</div>
+            </li>
+          {% empty %}
+            <li class="muted">No awards or achievements yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+
+    <!-- Research Areas -->
+    <section id="research-areas" class="research-areas" aria-labelledby="research-areas-title">
+      <div class="container">
+        <h2 id="research-areas-title" class="section-title">Research Areas</h2>
+        <div class="area-grid">
+          {% for area in areas %}
+            <a class="area-card" href="{% url 'research' %}" aria-label="{{ area.name }}">
+              <div class="area-thumb">
+                {% if area.image %}
+                  <img src="{{ area.image.url }}" alt="{{ area.name }} thumbnail">
+                {% else %}
+                  <div class="no-image">No image</div>
+                {% endif %}
+              </div>
+              <h3>{{ area.name }}</h3>
+              <p>{{ area.summary }}</p>
+            </a>
+          {% empty %}
+            <p class="muted">No research areas configured yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <!-- Ongoing Research Projects (after Research Areas) -->
+    <section id="ongoing-projects" class="ongoing-home" aria-labelledby="ongoing-home-title">
+      <div class="container">
+        <div class="section-header" style="display:flex;justify-content:space-between;align-items:baseline">
+          <h2 id="ongoing-home-title" class="section-title">Ongoing Research Projects</h2>
+          <a class="btn ghost" href="{% url 'research' %}?tab=projects#projects">More</a>
+        </div>
+        <ul class="proj-list">
+          {% for op in home_ongoing_projects %}
+            <li class="proj-item">
+              <div class="proj-head">
+                <span class="year-tag">{{ op.publication_year }}</span>
+                <strong class="proj-title">{{ op.title }}</strong>
+                {% if op.github_link %}
+                  <a class="btn ghost" href="{{ op.github_link }}" target="_blank" rel="noopener">GitHub</a>
+                {% endif %}
+              </div>
+              <div class="proj-authors">
+                {% if op.objective %}
+                  <div class="proj-objective">{{ op.objective }}</div>
+                {% else %}
+                  <span class="muted">No objective provided</span>
+                {% endif %}
+              </div>
+            </li>
+          {% empty %}
+            <li class="muted">No ongoing projects yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+
+    <!-- Team Slider after Research Areas -->
+    <section id="team" class="team-slider" aria-labelledby="team-title">
+      <div class="container">
+        <h2 id="team-title" class="section-title">Lab Team</h2>
+        <div class="pub-slideshow" data-interval="4000" id="team-slideshow">
+          {% for p in team_profiles %}
+            <div class="slide">
+              <article class="team-card">
+                <div class="team-photo" aria-label="Profile photo">
+                  {% if p.profile_picture %}
+                    <img src="{{ p.profile_picture.url }}" alt="{{ p.user.get_full_name|default:p.user.username }} photo">
+                  {% else %}
+                    <div class="placeholder" aria-hidden="true">{{ p.user.get_full_name|default:p.user.username|slice:":1" }}</div>
+                  {% endif %}
+                </div>
+                <div class="team-info">
+                  {% if p.role_label %}<div class="team-role" aria-label="Role">{{ p.role_label }}</div>{% endif %}
+                  <h3 class="team-name">{{ p.user.get_full_name|default:p.user.username }}</h3>
+                  {% if p.affiliation %}<div class="team-affiliation">{{ p.affiliation }}</div>{% endif %}
+                  {% with p.user.interests.all as interests %}
+                    {% if interests %}
+                      <div class="team-interests">
+                        {% for i in interests %}{{ i.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                      </div>
+                    {% endif %}
+                  {% endwith %}
+                </div>
+              </article>
+            </div>
+          {% empty %}
+            <div class="slide active"><div class="muted">No team members to display.</div></div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+  </main>
+{% endblock %}

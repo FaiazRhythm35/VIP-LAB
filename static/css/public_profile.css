@@ -1,0 +1,186 @@
+/* Scoped styles for Selected Publications on Public Profile */
+.profile-page .selected-publications { margin-top: 24px; }
+.profile-page .selected-publications h3 { margin: 0 0 12px; }
+
+.profile-page .selected-publications .pub-card {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 16px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  margin-bottom: 16px;
+}
+
+.profile-page .selected-publications .pub-media {
+  background: var(--surface-2);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.profile-page .selected-publications .pub-slideshow {
+  width: 100%;
+  height: 160px;
+  position: relative;
+}
+.profile-page .selected-publications .pub-slideshow .slide {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+.profile-page .selected-publications .pub-slideshow .slide.active { display: block; }
+.profile-page .selected-publications .pub-slideshow img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: var(--surface);
+}
+.profile-page .selected-publications .no-image {
+  display: grid;
+  place-items: center;
+  height: 160px;
+  color: var(--muted);
+}
+
+/* removed empty ruleset: .profile-page .selected-publications .pub-info */
+.profile-page .selected-publications .pub-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.profile-page .selected-publications .pub-title { font-weight: 700; }
+.profile-page .selected-publications .pub-year { color: var(--muted); font-weight: 600; }
+.profile-page .selected-publications .authors { color: var(--text); margin: 4px 0; }
+.profile-page .selected-publications .venue { color: var(--muted); margin-bottom: 8px; }
+
+.profile-page .selected-publications .action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+.profile-page .selected-publications .btn.ghost {
+  border: 1px solid var(--border);
+}
+.profile-page .selected-publications .btn.ghost.disabled {
+  cursor: not-allowed;
+  opacity: .5;
+}
+
+.profile-page .selected-publications .collapsible {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  background: var(--surface-2);
+  margin-top: 8px;
+}
+.profile-page .profile-links { margin-top: 8px; }
+.profile-page .profile-links .chip { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); }
+.profile-page .link-row { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px; }
+.profile-page .link-row .chip { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); }
+.profile-page .selected-publications pre { white-space: pre-wrap; cursor: copy; }
+
+/* Hint for click-to-copy inside BibTeX box */
+.profile-page .selected-publications .collapsible .copy-hint {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* CV viewer */
+.profile-page .cv-viewer {
+  margin-top: 14px;
+  height: 700px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-1);
+}
+.profile-page .cv-viewer iframe,
+.profile-page .cv-viewer embed,
+.profile-page .cv-viewer object { width: 100%; height: 100%; border: 0; display: block; }
+.profile-page .cv-actions { margin-top: 12px; }
+
+@media (max-width: 700px) {
+  .profile-page .selected-publications .pub-card { grid-template-columns: 1fr; }
+  .profile-page .selected-publications .pub-slideshow { height: 140px; }
+  .profile-page .cv-viewer { height: 520px; }
+}
+
+.profile-page .bio-block { text-align: justify; hyphens: auto; }
+.profile-page .profile-subtitle { text-align: justify; }
+.profile-page .bullet-list li { text-align: justify; hyphens: auto; }
+.profile-page .ach-list .ach-desc { text-align: justify; hyphens: auto; }
+.profile-page .exp-subtitle, .profile-page .proj-subtitle { text-align: justify; hyphens: auto; }
+.profile-page .exp-item .bullet-list li, .profile-page .proj-item .bullet-list li { text-align: justify; hyphens: auto; }
+
+/* Ongoing Research Projects */
+.profile-page .ongoing-projects { margin-top: 28px; }
+.profile-page .ongoing-projects h3 { margin: 0 0 12px; }
+.profile-page .ongoing-projects .pub-card {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 16px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  margin-bottom: 16px;
+}
+.profile-page .ongoing-projects .pub-card.no-media { grid-template-columns: 1fr; }
+.profile-page .ongoing-projects .pub-media {
+  background: var(--surface-2);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+.profile-page .ongoing-projects .pub-slideshow { width: 100%; height: 160px; position: relative; }
+.profile-page .ongoing-projects .pub-slideshow .slide { position: absolute; inset: 0; display: none; }
+.profile-page .ongoing-projects .pub-slideshow .slide.active { display: block; }
+.profile-page .ongoing-projects .pub-slideshow img { width: 100%; height: 100%; object-fit: contain; display: block; background: var(--surface); }
+.profile-page .ongoing-projects .no-image { display: grid; place-items: center; height: 160px; color: var(--muted); }
+
+/* Reference-style heading line */
+.profile-page .ongoing-projects .ref-line { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; margin-bottom: 8px; }
+.profile-page .ongoing-projects .ref-title { font-weight: 700; }
+.profile-page .ongoing-projects .ref-meta { color: var(--muted); font-style: italic; }
+
+/* Details button with arrow state */
+.profile-page .ongoing-projects .view-details::after { content: '▼'; margin-left: 6px; font-size: 12px; color: var(--muted); transition: transform .18s ease; }
+.profile-page .ongoing-projects .view-details.active::after { transform: rotate(180deg); }
+
+/* Collapsible details with subtle appear animation */
+.profile-page .ongoing-projects .collapsible { position: relative; border: 1px solid var(--border); border-radius: 10px; padding: 10px; background: var(--surface-2); margin-top: 8px; animation: slideFadeIn .18s ease; }
+@keyframes slideFadeIn { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
+.profile-page .ongoing-projects .details-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.profile-page .ongoing-projects .image-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.profile-page .ongoing-projects .image-row.large .thumb { width: 100%; height: 280px; object-fit: contain; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); }
+
+@media (max-width: 700px) {
+  .profile-page .ongoing-projects .pub-card { grid-template-columns: 1fr; }
+  .profile-page .ongoing-projects .image-row.large .thumb { height: 200px; }
+}
+
+/* Image Lightbox (global) */
+.img-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 24px; cursor: zoom-out; }
+.img-lightbox.open { display: flex; }
+.img-lightbox .lb-content { position: relative; max-width: min(96vw, 1200px); max-height: 88vh; }
+.img-lightbox .lb-image { width: 100%; height: auto; max-height: 88vh; object-fit: contain; border-radius: 12px; box-shadow: var(--shadow-2); background: var(--surface); border: 1px solid var(--border); }
+.img-lightbox .lb-close { position: absolute; top: 8px; right: 8px; width: 36px; height: 36px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text); display: grid; place-items: center; cursor: pointer; box-shadow: var(--shadow-1); }
+
+body.no-scroll { overflow: hidden; }

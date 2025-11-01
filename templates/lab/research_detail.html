@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Research — {{ area.title }}{% endblock %}
+{% block content %}
+  <main class="main">
+    <section class="page-header">
+      <div class="container">
+        <h1>{{ area.title }}</h1>
+        <p class="lead">{{ area.summary }}</p>
+        <a class="btn ghost" href="{% url 'home' %}#research-areas">Back to Research Areas</a>
+      </div>
+    </section>
+
+    <section class="content-block">
+      <div class="container">
+        <div class="text-block">
+          <p>{{ area.details }}</p>
+          <p>
+            This page aggregates publications, datasets, and ongoing projects relevant to
+            {{ area.title }}. More details will be added as the lab publishes updates.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+{% endblock %}

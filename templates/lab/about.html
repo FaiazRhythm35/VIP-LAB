@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load textformat %}
+{% block title %}About — {{ title }}{% endblock %}
+{% block content %}
+  <main class="main about-page">
+    <section class="page-header">
+      <div class="container">
+        <h1>{{ title }}</h1>
+        {% if summary %}<p class="lead">{{ summary }}</p>{% endif %}
+      </div>
+    </section>
+
+    <section class="content-block">
+      <div class="container">
+        {% if aim %}
+          <h2>Aim</h2>
+          <div class="prose">{{ aim|format_desc }}</div>
+        {% endif %}
+
+        {% if mission %}
+          <h2>Mission</h2>
+          <div class="prose">{{ mission|format_desc }}</div>
+        {% endif %}
+
+        {% if vision %}
+          <h2>Vision</h2>
+          <div class="prose">{{ vision|format_desc }}</div>
+        {% endif %}
+      </div>
+    </section>
+  </main>
+{% endblock %}
