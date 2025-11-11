@@ -1,5 +1,7 @@
 # VIP Lab Host Website — Directory & Overview
 
+Visit: https://vip-eece.mist.ac.bd
+
 This repository contains a Django-based website for a research lab. It manages public pages (home, research areas, publications, people, about) and user-facing features (login, password reset/change, profile pages), along with admin/user management utilities.
 
 ## Directory Structure (simplified)
